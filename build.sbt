@@ -8,7 +8,6 @@ lazy val root = (project in file("."))
   .settings(
     name := "TinyGPU",
     libraryDependencies ++= Seq(
-      //"org.chipsalliance" %% "chisel" % chisel6Version,
       "org.chipsalliance" %% "chisel" % chiselVersion,
       "org.scalatest" %% "scalatest" % "3.2.19" % "test"
     ),
@@ -18,9 +17,6 @@ lazy val root = (project in file("."))
       "-feature",
       "-language:reflectiveCalls",
     ),
-    //addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chisel6Version cross CrossVersion.full),
     addCompilerPlugin("org.chipsalliance" % "chisel-plugin" % chiselVersion cross CrossVersion.full),
-    //resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
-    //resolvers ++= Resolver.sonatypeOssRepos("releases")
 )
 
