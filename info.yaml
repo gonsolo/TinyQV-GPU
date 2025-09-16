@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        "TinyGPU"      # Project title
-  author:       "Andreas Wendleder"      # Your name
+  title:        "TinyGPU"
+  author:       "Andreas Wendleder"
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
+  description:  "Tiny GPU peripheral"
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     64000000  # Clock frequency in Hz (or 0 if not applicable)
 
