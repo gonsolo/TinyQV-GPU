@@ -14,8 +14,9 @@ class TinyGPU extends Module {
 
 object Main extends App {
   println(
-    ChiselStage.emitSystemVerilog(
-      gen = new TinyGPU()
+    ChiselStage.emitSystemVerilogFile(
+      gen = new TinyGPU(),
+      args = Array("--target-dir", "output")
     )
   )
 }
