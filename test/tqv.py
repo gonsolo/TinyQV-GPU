@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: © 2025 Michael Bell
 # SPDX-License-Identifier: Apache-2.0
 
+import cocotb
 from cocotb.triggers import ClockCycles
 
 from tqv_reg import spi_write_cpha0, spi_read_cpha0
@@ -64,4 +65,8 @@ class TinyQV:
     
     # Check whether the user interrupt is asserted
     async def is_interrupt_asserted(self):
-        return self.dut.uio_out.value[0] == 1
+        if cocotb.__version__.startswith("2."):
+            return self.dut.uio_out.value[0] == 1
+        else:
+            return self.dut.uio_out[0].value == 1
+
