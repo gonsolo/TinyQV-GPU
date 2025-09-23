@@ -17,7 +17,10 @@ async def test_project(dut):
     dut._log.info("Start")
 
     # Set the clock period to 100 ns (10 MHz)
-    clock = Clock(dut.clk, 100, unit="ns")
+    if cocotb.__version__.startswith("2."):
+        clock = Clock(dut.clk, 100, unit="ns")
+    else:
+        clock = Clock(dut.clk, 100, units="ns")
     cocotb.start_soon(clock.start())
 
     # Interact with your design's registers through this TinyQV class.
