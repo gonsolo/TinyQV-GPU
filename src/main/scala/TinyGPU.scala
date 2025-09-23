@@ -69,7 +69,8 @@ object Main extends App {
   println(
     ChiselStage.emitSystemVerilogFile(
       gen = new TinyGPU(),
-      args = Array("--target-dir", "output")
+      args = Array("--target-dir", "src"),
+      firtoolOpts = Array("--lowering-options=disallowLocalVariables")
     )
   )
 }

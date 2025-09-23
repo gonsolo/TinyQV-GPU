@@ -17,4 +17,6 @@ run_workflow_doc:
 
 generate_verilog:
 	sbt "runMain tinygpu.Main"
-.PHONY: all generate_verilog run_workflow_test run_workflow_doc
+test:
+	make -C test
+.PHONY: all generate_verilog run_workflow_test run_workflow_doc test

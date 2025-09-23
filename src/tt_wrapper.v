@@ -38,18 +38,32 @@ module tt_um_tqv_peripheral_harness (
 
   // The peripheral under test.
   // **** Change the module name from tqvp_example to match your peripheral. ****
-  tqvp_example user_peripheral(
-    .clk(clk),
-    .rst_n(rst_reg_n),
-    .ui_in(ui_in_sync),
-    .uo_out(uo_out),
-    .address(address),
-    .data_in(data_in),
-    .data_write_n(data_write_n),
-    .data_read_n(data_read_n),
-    .data_out(data_out),
-    .data_ready(data_ready),
-    .user_interrupt(user_interrupt)
+  //tqvp_example user_peripheral(
+  //  .clk(clk),
+  //  .rst_n(rst_reg_n),
+  //  .ui_in(ui_in_sync),
+  //  .uo_out(uo_out),
+  //  .address(address),
+  //  .data_in(data_in),
+  //  .data_write_n(data_write_n),
+  //  .data_read_n(data_read_n),
+  //  .data_out(data_out),
+  //  .data_ready(data_ready),
+  //  .user_interrupt(user_interrupt)
+  //);
+
+  TinyGPU user_peripheral(
+    .clock(clk),
+    .reset(!rst_reg_n),
+    .io_ui_in(ui_in_sync),
+    .io_uo_out(uo_out),
+    .io_address(address),
+    .io_data_in(data_in),
+    .io_data_write_n(data_write_n),
+    .io_data_read_n(data_read_n),
+    .io_data_out(data_out),
+    .io_data_ready(data_ready),
+    .io_user_interrupt(user_interrupt)
   );
 
   // SPI data indications
