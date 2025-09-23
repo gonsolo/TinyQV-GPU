@@ -5,6 +5,12 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
+def get_int(value):
+    if cocotb.__version__.startswith("2."):
+        return value.to_unsigned()
+    else:
+        return value
+
 def get_bit(value, bit_index):
   temp = value & (1 << bit_index)
   return temp
@@ -56,18 +62,18 @@ SPI_HALF_CYCLE_DELAY = 2
 
 async def spi_write_cpha0 (clk, port, address, data, width):
 
-  temp = port.value.to_unsigned();
+  temp = get_int(port.value)
   result = pull_cs_high(temp)
   port.value = result
   await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
 
   # Pull CS low + Write command bit - bit 31 - MSBIT in first word
-  temp = port.value.to_unsigned();
+  temp = get_int(port.value)
   result = pull_cs_low(temp)
   result2 = spi_mosi_high(result)
   port.value = result2
   await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
-  temp = port.value.to_unsigned();
+  temp = get_int(port.value)
   result = spi_clk_invert(temp)
   port.value = result
   await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
@@ -75,7 +81,7 @@ async def spi_write_cpha0 (clk, port, address, data, width):
   # Next two bits indicate txn width
   iterator = 1
   while iterator >= 0:
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     address_bit = get_bit(width, iterator)
     if (address_bit == 0):
@@ -84,7 +90,7 @@ async def spi_write_cpha0 (clk, port, address, data, width):
       result2 = spi_mosi_high(result)
     port.value = result2
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     port.value = result
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
@@ -93,12 +99,12 @@ async def spi_write_cpha0 (clk, port, address, data, width):
   iterator = 0
   while iterator < 23:
     # Don't care - bits 28-6
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     result2 = spi_mosi_low(result)
     port.value = result2
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     port.value = result
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
@@ -107,7 +113,7 @@ async def spi_write_cpha0 (clk, port, address, data, width):
   iterator = 5
   while iterator >= 0:
     # Address[iterator] - bits 5-0
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     address_bit = get_bit(address, iterator)
     if (address_bit == 0):
@@ -116,7 +122,7 @@ async def spi_write_cpha0 (clk, port, address, data, width):
       result2 = spi_mosi_high(result)
     port.value = result2
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     port.value = result
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
@@ -125,7 +131,7 @@ async def spi_write_cpha0 (clk, port, address, data, width):
   iterator = 31
   while iterator >= 0:
     # Data[iterator]
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     data_bit = get_bit(data, iterator)
     if (data_bit == 0):
@@ -134,18 +140,18 @@ async def spi_write_cpha0 (clk, port, address, data, width):
       result2 = spi_mosi_high(result)
     port.value = result2
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
-    temp = port.value.to_unsigned();
+    temp = get_int(port.value)
     result = spi_clk_invert(temp)
     port.value = result
     await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
     iterator -= 1
 
-  temp = port.value.to_unsigned();
+  temp = get_int(port.value)
   result = spi_clk_invert(temp)
   port.value = result
   await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)
 
-  temp = port.value.to_unsigned();
+  temp = get_int(port.value)
   result = pull_cs_high(temp)
   port.value = result
   await ClockCycles(clk, SPI_HALF_CYCLE_DELAY)  
