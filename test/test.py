@@ -63,13 +63,14 @@ async def test_project(dut):
     assert dut.uo_out.value == 70
 
     # Test the interrupt, generated when ui_in[6] goes high
-    #dut.ui_in[6].value = 1
-    #await ClockCycles(dut.clk, 1)
-    #dut.ui_in[6].value = 0
-
-    dut.ui_in.value = dut.ui_in.value.to_unsigned() | (1 << 6)
-    await ClockCycles(dut.clk, 3)
-    dut.ui_in.value = dut.ui_in.value.to_unsigned() & ~(1 << 6)
+    if cocotb.__version__.startswith("2."):
+        dut.ui_in.value = dut.ui_in.value.to_unsigned() | (1 << 6)
+        await ClockCycles(dut.clk, 3)
+        dut.ui_in.value = dut.ui_in.value.to_unsigned() & ~(1 << 6)
+    else:
+        dut.ui_in[6].value = 1
+        await ClockCycles(dut.clk, 1)
+        dut.ui_in[6].value = 0
 
     # Interrupt asserted
     await ClockCycles(dut.clk, 3)
