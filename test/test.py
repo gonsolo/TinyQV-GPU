@@ -17,7 +17,7 @@ async def test_project(dut):
     dut._log.info("Start")
 
     # Set the clock period to 100 ns (10 MHz)
-    clock = Clock(dut.clk, 100, units="ns")
+    clock = Clock(dut.clk, 100, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Interact with your design's registers through this TinyQV class.
@@ -60,9 +60,13 @@ async def test_project(dut):
     assert dut.uo_out.value == 70
 
     # Test the interrupt, generated when ui_in[6] goes high
-    dut.ui_in[6].value = 1
-    await ClockCycles(dut.clk, 1)
-    dut.ui_in[6].value = 0
+    #dut.ui_in[6].value = 1
+    #await ClockCycles(dut.clk, 1)
+    #dut.ui_in[6].value = 0
+
+    dut.ui_in.value = dut.ui_in.value.to_unsigned() | (1 << 6)
+    await ClockCycles(dut.clk, 3)
+    dut.ui_in.value = dut.ui_in.value.to_unsigned() & ~(1 << 6)
 
     # Interrupt asserted
     await ClockCycles(dut.clk, 3)
