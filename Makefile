@@ -6,7 +6,7 @@ SECRET=GITHUB_TOKEN=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
 ENV=ACTIONS_RUNTIME_TOKEN=12345
 ARTIFACT=/tmp/artifacts
 
-all: generate_verilog
+all: test
 run_workflow_test:
 	act --workflows $(TEST) --platform $(PLATFORM) --env $(ENV) --artifact-server-path $(ARTIFACT)
 run_workflow_doc:
