@@ -19,8 +19,8 @@ project:
   source_files:
     - "peripheral.v"
     - "TinyGPU.sv"
-    - "AddRecFn.sv"
-    - "AddRawFn.sv"
+    - "AddRecFN.sv"
+    - "AddRawFN.sv"
     - "RoundRawFNToRecFN_e5_s11.sv"
     - "RoundAnyRawFNToRecFN_ie5_is13_oe5_os11.sv"
     - "tt_wrapper.v"
