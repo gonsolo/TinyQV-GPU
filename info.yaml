@@ -19,6 +19,10 @@ project:
   source_files:
     - "peripheral.v"
     - "TinyGPU.sv"
+    - "AddRecFn.sv"
+    - "AddRawFn.sv"
+    - "RoundRawFNToRecFN_e5_s11.sv"
+    - "RoundAnyRawFNToRecFN_ie5_is13_oe5_os11.sv"
     - "tt_wrapper.v"
     - "test_harness/falling_edge_detector.sv"
     - "test_harness/rising_edge_detector.sv"

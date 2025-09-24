@@ -6,6 +6,13 @@ package tinygpu
 import chisel3._
 import chisel3.util.{MuxCase, Cat}
 import circt.stage.ChiselStage
+import hardfloat._
+
+object Globals {
+  // FP16: exp = 5, sig = 11
+  val expWidth = 5
+  val sigWidth = 11
+}
 
 class TinyGPU extends Module {
   val io = IO(new Bundle {
@@ -18,6 +25,8 @@ class TinyGPU extends Module {
     val data_out = Output(UInt(32.W))
     val data_ready = Output(Bool())
     val user_interrupt = Output(Bool())
+
+    val dummy_output = Output(Bits((Globals.expWidth + Globals.sigWidth).W))
   })
 
   val example_data = RegInit(0.U(32.W))
@@ -63,14 +72,34 @@ class TinyGPU extends Module {
   last_ui_in_6 := io.ui_in(6)
 
   io.user_interrupt := example_interrupt
+
+  // Adder
+  val add_a = RegInit(0.U((Globals.expWidth + Globals.sigWidth).W))
+  val add_b = RegInit(0.U((Globals.expWidth + Globals.sigWidth).W))
+  add_a := example_data
+  add_b := example_data
+  val roundingMode = RegInit(0.U(3.W))
+  val detectTininess = RegInit(false.B)
+
+  val addRecFN = Module(new AddRecFN(Globals.expWidth, Globals.sigWidth))
+  addRecFN.io.subOp := false.B
+  addRecFN.io.a := recFNFromFN(Globals.expWidth, Globals.sigWidth, add_a)
+  addRecFN.io.b := recFNFromFN(Globals.expWidth, Globals.sigWidth, add_b)
+  addRecFN.io.roundingMode   := roundingMode
+  addRecFN.io.detectTininess := detectTininess
+
+  io.dummy_output := addRecFN.io.out
 }
 
 object Main extends App {
-  println(
+
+  def emitModule(module: => RawModule) = {
     ChiselStage.emitSystemVerilogFile(
-      gen = new TinyGPU(),
+      gen = module,
       args = Array("--target-dir", "src"),
       firtoolOpts = Array("--lowering-options=disallowLocalVariables")
     )
-  )
+  }
+
+  emitModule(new TinyGPU())
 }

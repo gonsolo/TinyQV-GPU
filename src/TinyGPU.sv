@@ -43,70 +43,152 @@
     `define INIT_RANDOM_PROLOG_
   `endif // RANDOMIZE
 `endif // not def INIT_RANDOM_PROLOG_
-module TinyGPU(	// src/main/scala/TinyGPU.scala:10:7
-  input         clock,	// src/main/scala/TinyGPU.scala:10:7
-                reset,	// src/main/scala/TinyGPU.scala:10:7
-  input  [7:0]  io_ui_in,	// src/main/scala/TinyGPU.scala:11:14
-  output [7:0]  io_uo_out,	// src/main/scala/TinyGPU.scala:11:14
-  input  [5:0]  io_address,	// src/main/scala/TinyGPU.scala:11:14
-  input  [31:0] io_data_in,	// src/main/scala/TinyGPU.scala:11:14
-  input  [1:0]  io_data_write_n,	// src/main/scala/TinyGPU.scala:11:14
-                io_data_read_n,	// src/main/scala/TinyGPU.scala:11:14
-  output [31:0] io_data_out,	// src/main/scala/TinyGPU.scala:11:14
-  output        io_data_ready,	// src/main/scala/TinyGPU.scala:11:14
-                io_user_interrupt	// src/main/scala/TinyGPU.scala:11:14
+module TinyGPU(	// src/main/scala/TinyGPU.scala:17:7
+  input         clock,	// src/main/scala/TinyGPU.scala:17:7
+                reset,	// src/main/scala/TinyGPU.scala:17:7
+  input  [7:0]  io_ui_in,	// src/main/scala/TinyGPU.scala:18:14
+  output [7:0]  io_uo_out,	// src/main/scala/TinyGPU.scala:18:14
+  input  [5:0]  io_address,	// src/main/scala/TinyGPU.scala:18:14
+  input  [31:0] io_data_in,	// src/main/scala/TinyGPU.scala:18:14
+  input  [1:0]  io_data_write_n,	// src/main/scala/TinyGPU.scala:18:14
+                io_data_read_n,	// src/main/scala/TinyGPU.scala:18:14
+  output [31:0] io_data_out,	// src/main/scala/TinyGPU.scala:18:14
+  output        io_data_ready,	// src/main/scala/TinyGPU.scala:18:14
+                io_user_interrupt,	// src/main/scala/TinyGPU.scala:18:14
+  output [15:0] io_dummy_output	// src/main/scala/TinyGPU.scala:18:14
 );
 
-  reg  [31:0] example_data;	// src/main/scala/TinyGPU.scala:23:29
-  wire        _io_data_out_T = io_address == 6'h0;	// src/main/scala/TinyGPU.scala:30:17
-  reg         example_interrupt;	// src/main/scala/TinyGPU.scala:54:34
-  reg         last_ui_in_6;	// src/main/scala/TinyGPU.scala:55:29
-  always @(posedge clock) begin	// src/main/scala/TinyGPU.scala:10:7
-    if (reset) begin	// src/main/scala/TinyGPU.scala:10:7
-      example_data <= 32'h0;	// src/main/scala/TinyGPU.scala:23:29
-      example_interrupt <= 1'h0;	// src/main/scala/TinyGPU.scala:10:7, :54:34
-      last_ui_in_6 <= 1'h0;	// src/main/scala/TinyGPU.scala:10:7, :55:29
+  wire [16:0] _addRecFN_io_out;	// src/main/scala/TinyGPU.scala:84:24
+  reg  [31:0] example_data;	// src/main/scala/TinyGPU.scala:32:29
+  wire        _io_data_out_T = io_address == 6'h0;	// src/main/scala/TinyGPU.scala:39:17
+  reg         example_interrupt;	// src/main/scala/TinyGPU.scala:63:34
+  reg         last_ui_in_6;	// src/main/scala/TinyGPU.scala:64:29
+  reg  [15:0] add_a;	// src/main/scala/TinyGPU.scala:77:22
+  reg  [15:0] add_b;	// src/main/scala/TinyGPU.scala:78:22
+  wire        addRecFN_io_a_rawIn_isZeroExpIn = add_a[14:10] == 5'h0;	// src/main/scala/TinyGPU.scala:77:22, src/main/scala/rawFloatFromFN.scala:45:19, :48:30
+  wire [3:0]  addRecFN_io_a_rawIn_normDist =
+    add_a[9]
+      ? 4'h0
+      : add_a[8]
+          ? 4'h1
+          : add_a[7]
+              ? 4'h2
+              : add_a[6]
+                  ? 4'h3
+                  : add_a[5]
+                      ? 4'h4
+                      : add_a[4]
+                          ? 4'h5
+                          : add_a[3] ? 4'h6 : add_a[2] ? 4'h7 : {3'h4, ~(add_a[1])};	// src/main/scala/TinyGPU.scala:77:22, src/main/scala/chisel3/util/Mux.scala:58:84, src/main/scala/primitives.scala:91:52, src/main/scala/rawFloatFromFN.scala:46:21
+  wire [24:0] _addRecFN_io_a_rawIn_subnormFract_T =
+    {15'h0, add_a[9:0]} << addRecFN_io_a_rawIn_normDist;	// src/main/scala/TinyGPU.scala:77:22, src/main/scala/chisel3/util/Mux.scala:58:84, src/main/scala/rawFloatFromFN.scala:46:21, :52:33
+  wire [5:0]  _addRecFN_io_a_rawIn_adjustedExp_T_4 =
+    (addRecFN_io_a_rawIn_isZeroExpIn
+       ? {2'h3, ~addRecFN_io_a_rawIn_normDist}
+       : {1'h0, add_a[14:10]}) + {4'h4, addRecFN_io_a_rawIn_isZeroExpIn ? 2'h2 : 2'h1};	// src/main/scala/TinyGPU.scala:17:7, :77:22, src/main/scala/chisel3/util/Mux.scala:58:84, src/main/scala/rawFloatFromFN.scala:45:19, :48:30, :54:10, :55:18, :57:9, :58:14
+  wire [2:0]  _addRecFN_io_a_T_1 =
+    addRecFN_io_a_rawIn_isZeroExpIn & ~(|(add_a[9:0]))
+      ? 3'h0
+      : _addRecFN_io_a_rawIn_adjustedExp_T_4[5:3];	// src/main/scala/TinyGPU.scala:77:22, src/main/scala/rawFloatFromFN.scala:46:21, :48:30, :49:34, :57:9, :60:30, src/main/scala/recFNFromFN.scala:48:{15,50}
+  wire        addRecFN_io_b_rawIn_isZeroExpIn = add_b[14:10] == 5'h0;	// src/main/scala/TinyGPU.scala:78:22, src/main/scala/rawFloatFromFN.scala:45:19, :48:30
+  wire [3:0]  addRecFN_io_b_rawIn_normDist =
+    add_b[9]
+      ? 4'h0
+      : add_b[8]
+          ? 4'h1
+          : add_b[7]
+              ? 4'h2
+              : add_b[6]
+                  ? 4'h3
+                  : add_b[5]
+                      ? 4'h4
+                      : add_b[4]
+                          ? 4'h5
+                          : add_b[3] ? 4'h6 : add_b[2] ? 4'h7 : {3'h4, ~(add_b[1])};	// src/main/scala/TinyGPU.scala:78:22, src/main/scala/chisel3/util/Mux.scala:58:84, src/main/scala/primitives.scala:91:52, src/main/scala/rawFloatFromFN.scala:46:21
+  wire [24:0] _addRecFN_io_b_rawIn_subnormFract_T =
+    {15'h0, add_b[9:0]} << addRecFN_io_b_rawIn_normDist;	// src/main/scala/TinyGPU.scala:78:22, src/main/scala/chisel3/util/Mux.scala:58:84, src/main/scala/rawFloatFromFN.scala:46:21, :52:33
+  wire [5:0]  _addRecFN_io_b_rawIn_adjustedExp_T_4 =
+    (addRecFN_io_b_rawIn_isZeroExpIn
+       ? {2'h3, ~addRecFN_io_b_rawIn_normDist}
+       : {1'h0, add_b[14:10]}) + {4'h4, addRecFN_io_b_rawIn_isZeroExpIn ? 2'h2 : 2'h1};	// src/main/scala/TinyGPU.scala:17:7, :78:22, src/main/scala/chisel3/util/Mux.scala:58:84, src/main/scala/rawFloatFromFN.scala:45:19, :48:30, :54:10, :55:18, :57:9, :58:14
+  wire [2:0]  _addRecFN_io_b_T_1 =
+    addRecFN_io_b_rawIn_isZeroExpIn & ~(|(add_b[9:0]))
+      ? 3'h0
+      : _addRecFN_io_b_rawIn_adjustedExp_T_4[5:3];	// src/main/scala/TinyGPU.scala:78:22, src/main/scala/rawFloatFromFN.scala:46:21, :48:30, :49:34, :57:9, :60:30, src/main/scala/recFNFromFN.scala:48:{15,50}
+  always @(posedge clock) begin	// src/main/scala/TinyGPU.scala:17:7
+    if (reset) begin	// src/main/scala/TinyGPU.scala:17:7
+      example_data <= 32'h0;	// src/main/scala/TinyGPU.scala:32:29
+      example_interrupt <= 1'h0;	// src/main/scala/TinyGPU.scala:63:34
+      last_ui_in_6 <= 1'h0;	// src/main/scala/TinyGPU.scala:64:29
+      add_a <= 16'h0;	// src/main/scala/TinyGPU.scala:77:22
+      add_b <= 16'h0;	// src/main/scala/TinyGPU.scala:78:22
     end
-    else begin	// src/main/scala/TinyGPU.scala:10:7
-      if (_io_data_out_T & io_data_write_n == 2'h2)	// src/main/scala/TinyGPU.scala:10:7, :30:{17,28,47}
-        example_data <= io_data_in;	// src/main/scala/TinyGPU.scala:23:29
-      else if (_io_data_out_T & io_data_write_n == 2'h1)	// src/main/scala/TinyGPU.scala:10:7, :30:17, :32:{28,47}
-        example_data <= {example_data[31:16], io_data_in[15:0]};	// src/main/scala/TinyGPU.scala:23:29, :32:{66,79,99}
-      else if (_io_data_out_T & io_data_write_n == 2'h0)	// src/main/scala/TinyGPU.scala:10:7, :30:17, :34:{28,47}
-        example_data <= {example_data[31:8], io_data_in[7:0]};	// src/main/scala/TinyGPU.scala:23:29, :34:{66,79,98}
+    else begin	// src/main/scala/TinyGPU.scala:17:7
+      if (_io_data_out_T & io_data_write_n == 2'h2)	// src/main/scala/TinyGPU.scala:17:7, :39:{17,28,47}
+        example_data <= io_data_in;	// src/main/scala/TinyGPU.scala:32:29
+      else if (_io_data_out_T & io_data_write_n == 2'h1)	// src/main/scala/TinyGPU.scala:17:7, :39:17, :41:{28,47}
+        example_data <= {example_data[31:16], io_data_in[15:0]};	// src/main/scala/TinyGPU.scala:32:29, :41:{66,79,99}
+      else if (_io_data_out_T & io_data_write_n == 2'h0)	// src/main/scala/TinyGPU.scala:17:7, :39:17, :43:{28,47}
+        example_data <= {example_data[31:8], io_data_in[7:0]};	// src/main/scala/TinyGPU.scala:32:29, :43:{66,79,98}
       example_interrupt <=
         io_ui_in[6] & ~last_ui_in_6
         | ~(io_address == 6'h8 & io_data_write_n != 2'h3 & io_data_in[0])
-        & example_interrupt;	// src/main/scala/TinyGPU.scala:54:34, :55:29, :57:{16,20,23,38}, :58:23, :59:{25,36,55,67,80,93}, :60:23
-      last_ui_in_6 <= io_ui_in[6];	// src/main/scala/TinyGPU.scala:55:29, :57:16
+        & example_interrupt;	// src/main/scala/TinyGPU.scala:17:7, :63:34, :64:29, :66:{16,20,23,38}, :67:23, :68:{25,36,55,67,80,93}, :69:23
+      last_ui_in_6 <= io_ui_in[6];	// src/main/scala/TinyGPU.scala:64:29, :66:16
+      add_a <= example_data[15:0];	// src/main/scala/TinyGPU.scala:32:29, :77:22, :79:9
+      add_b <= example_data[15:0];	// src/main/scala/TinyGPU.scala:32:29, :78:22, :79:9
     end
   end // always @(posedge)
-  `ifdef ENABLE_INITIAL_REG_	// src/main/scala/TinyGPU.scala:10:7
-    `ifdef FIRRTL_BEFORE_INITIAL	// src/main/scala/TinyGPU.scala:10:7
-      `FIRRTL_BEFORE_INITIAL	// src/main/scala/TinyGPU.scala:10:7
+  `ifdef ENABLE_INITIAL_REG_	// src/main/scala/TinyGPU.scala:17:7
+    `ifdef FIRRTL_BEFORE_INITIAL	// src/main/scala/TinyGPU.scala:17:7
+      `FIRRTL_BEFORE_INITIAL	// src/main/scala/TinyGPU.scala:17:7
     `endif // FIRRTL_BEFORE_INITIAL
-    logic [31:0] _RANDOM[0:1];	// src/main/scala/TinyGPU.scala:10:7
-    initial begin	// src/main/scala/TinyGPU.scala:10:7
-      `ifdef INIT_RANDOM_PROLOG_	// src/main/scala/TinyGPU.scala:10:7
-        `INIT_RANDOM_PROLOG_	// src/main/scala/TinyGPU.scala:10:7
+    logic [31:0] _RANDOM[0:2];	// src/main/scala/TinyGPU.scala:17:7
+    initial begin	// src/main/scala/TinyGPU.scala:17:7
+      `ifdef INIT_RANDOM_PROLOG_	// src/main/scala/TinyGPU.scala:17:7
+        `INIT_RANDOM_PROLOG_	// src/main/scala/TinyGPU.scala:17:7
       `endif // INIT_RANDOM_PROLOG_
-      `ifdef RANDOMIZE_REG_INIT	// src/main/scala/TinyGPU.scala:10:7
-        for (logic [1:0] i = 2'h0; i < 2'h2; i += 2'h1) begin
-          _RANDOM[i[0]] = `RANDOM;	// src/main/scala/TinyGPU.scala:10:7
-        end	// src/main/scala/TinyGPU.scala:10:7
-        example_data = _RANDOM[1'h0];	// src/main/scala/TinyGPU.scala:10:7, :23:29
-        example_interrupt = _RANDOM[1'h1][0];	// src/main/scala/TinyGPU.scala:10:7, :54:34
-        last_ui_in_6 = _RANDOM[1'h1][1];	// src/main/scala/TinyGPU.scala:10:7, :54:34, :55:29
+      `ifdef RANDOMIZE_REG_INIT	// src/main/scala/TinyGPU.scala:17:7
+        for (logic [1:0] i = 2'h0; i < 2'h3; i += 2'h1) begin
+          _RANDOM[i] = `RANDOM;	// src/main/scala/TinyGPU.scala:17:7
+        end	// src/main/scala/TinyGPU.scala:17:7
+        example_data = _RANDOM[2'h0];	// src/main/scala/TinyGPU.scala:17:7, :32:29
+        example_interrupt = _RANDOM[2'h1][0];	// src/main/scala/TinyGPU.scala:17:7, :63:34
+        last_ui_in_6 = _RANDOM[2'h1][1];	// src/main/scala/TinyGPU.scala:17:7, :63:34, :64:29
+        add_a = _RANDOM[2'h1][17:2];	// src/main/scala/TinyGPU.scala:17:7, :63:34, :77:22
+        add_b = {_RANDOM[2'h1][31:18], _RANDOM[2'h2][1:0]};	// src/main/scala/TinyGPU.scala:17:7, :63:34, :78:22
       `endif // RANDOMIZE_REG_INIT
     end // initial
-    `ifdef FIRRTL_AFTER_INITIAL	// src/main/scala/TinyGPU.scala:10:7
-      `FIRRTL_AFTER_INITIAL	// src/main/scala/TinyGPU.scala:10:7
+    `ifdef FIRRTL_AFTER_INITIAL	// src/main/scala/TinyGPU.scala:17:7
+      `FIRRTL_AFTER_INITIAL	// src/main/scala/TinyGPU.scala:17:7
     `endif // FIRRTL_AFTER_INITIAL
   `endif // ENABLE_INITIAL_REG_
-  assign io_uo_out = example_data[7:0] + io_ui_in;	// src/main/scala/TinyGPU.scala:10:7, :23:29, :40:{28,35}
+  AddRecFN addRecFN (	// src/main/scala/TinyGPU.scala:84:24
+    .io_a
+      ({add_a[15],
+        _addRecFN_io_a_T_1[2:1],
+        _addRecFN_io_a_T_1[0] | (&(_addRecFN_io_a_rawIn_adjustedExp_T_4[5:4]))
+          & (|(add_a[9:0])),
+        _addRecFN_io_a_rawIn_adjustedExp_T_4[2:0],
+        addRecFN_io_a_rawIn_isZeroExpIn
+          ? {_addRecFN_io_a_rawIn_subnormFract_T[8:0], 1'h0}
+          : add_a[9:0]}),	// src/main/scala/TinyGPU.scala:77:22, src/main/scala/rawFloatFromFN.scala:44:18, :46:21, :48:30, :49:34, :52:{33,46,64}, :57:9, :61:{32,57}, :64:28, :70:33, src/main/scala/recFNFromFN.scala:48:{15,76}, :50:{23,41}
+    .io_b
+      ({add_b[15],
+        _addRecFN_io_b_T_1[2:1],
+        _addRecFN_io_b_T_1[0] | (&(_addRecFN_io_b_rawIn_adjustedExp_T_4[5:4]))
+          & (|(add_b[9:0])),
+        _addRecFN_io_b_rawIn_adjustedExp_T_4[2:0],
+        addRecFN_io_b_rawIn_isZeroExpIn
+          ? {_addRecFN_io_b_rawIn_subnormFract_T[8:0], 1'h0}
+          : add_b[9:0]}),	// src/main/scala/TinyGPU.scala:78:22, src/main/scala/rawFloatFromFN.scala:44:18, :46:21, :48:30, :49:34, :52:{33,46,64}, :57:9, :61:{32,57}, :64:28, :70:33, src/main/scala/recFNFromFN.scala:48:{15,76}, :50:{23,41}
+    .io_out (_addRecFN_io_out)
+  );	// src/main/scala/TinyGPU.scala:84:24
+  assign io_uo_out = example_data[7:0] + io_ui_in;	// src/main/scala/TinyGPU.scala:17:7, :32:29, :49:{28,35}
   assign io_data_out =
-    _io_data_out_T ? example_data : io_address == 6'h4 ? {24'h0, io_ui_in} : 32'h0;	// src/main/scala/TinyGPU.scala:10:7, :23:29, :30:17, :47:{17,44}, src/main/scala/chisel3/util/Mux.scala:130:16
-  assign io_data_ready = 1'h1;	// src/main/scala/TinyGPU.scala:10:7
-  assign io_user_interrupt = example_interrupt;	// src/main/scala/TinyGPU.scala:10:7, :54:34
+    _io_data_out_T ? example_data : io_address == 6'h4 ? {24'h0, io_ui_in} : 32'h0;	// src/main/scala/TinyGPU.scala:17:7, :32:29, :39:17, :56:{17,44}, src/main/scala/chisel3/util/Mux.scala:130:16
+  assign io_data_ready = 1'h1;	// src/main/scala/TinyGPU.scala:17:7
+  assign io_user_interrupt = example_interrupt;	// src/main/scala/TinyGPU.scala:17:7, :63:34
+  assign io_dummy_output = _addRecFN_io_out[15:0];	// src/main/scala/TinyGPU.scala:17:7, :84:24, :91:19
 endmodule
 
