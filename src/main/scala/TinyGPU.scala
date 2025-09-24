@@ -25,8 +25,6 @@ class TinyGPU extends Module {
     val data_out = Output(UInt(32.W))
     val data_ready = Output(Bool())
     val user_interrupt = Output(Bool())
-
-    val dummy_output = Output(Bits((Globals.expWidth + Globals.sigWidth).W))
   })
 
   val example_data = RegInit(0.U(32.W))
@@ -48,14 +46,6 @@ class TinyGPU extends Module {
 
   io.uo_out := example_data(7, 0) + io.ui_in
 
-  // Address 0 reads the example data register.
-  // Address 4 reads ui_in.
-  // All other addresses read 0.
-  io.data_out := MuxCase(0.U, Seq(
-    (io.address === "h0".U) -> example_data,
-    (io.address === "h4".U) -> io.ui_in.pad(32)
-  ))
-
   // All reads complete in 1 clock
   io.data_ready := true.B
 
@@ -76,9 +66,9 @@ class TinyGPU extends Module {
   // Adder
   val add_a = RegInit(0.U((Globals.expWidth + Globals.sigWidth).W))
   val add_b = RegInit(0.U((Globals.expWidth + Globals.sigWidth).W))
-  add_a := example_data
-  add_b := example_data
-  val roundingMode = RegInit(0.U(3.W))
+  add_a := example_data(31, 16)
+  add_b := example_data(15, 0)
+  val roundingMode = RegInit(consts.round_near_even)
   val detectTininess = RegInit(false.B)
 
   val addRecFN = Module(new AddRecFN(Globals.expWidth, Globals.sigWidth))
@@ -88,7 +78,17 @@ class TinyGPU extends Module {
   addRecFN.io.roundingMode   := roundingMode
   addRecFN.io.detectTininess := detectTininess
 
-  io.dummy_output := addRecFN.io.out
+  val add_result = RegInit(0.U((Globals.expWidth + Globals.sigWidth).W))
+  add_result := addRecFN.io.out
+ 
+  // Address 0 reads the example data register.
+  // Address 4 reads ui_in.
+  // All other addresses read 0.
+  io.data_out := MuxCase(0.U, Seq(
+    (io.address === "h0".U) -> example_data,
+    (io.address === "h4".U) -> io.ui_in.pad(32),
+    (io.address === "h8".U) -> Cat(add_result, 0.U(16.W))
+  ))
 }
 
 object Main extends App {
